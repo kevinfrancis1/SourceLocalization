@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Kevin J. Cunningham</origin>
+        <origin>Richard L. Westcott</origin>
+        <pubdate>2020</pubdate>
+        <title>Methane, nitrogen, oxygen, and carbon dioxide data from Dive 326 on 05/07/2016, Key Biscayne Pockmark</title>
+        <geoform>text file</geoform>
+        <pubinfo>
+          <pubplace>Denver, CO</pubplace>
+          <publish>U.S. Geological Survey</publish>
+        </pubinfo>
+        <onlink>https://doi.org/10.5066/F7H13196</onlink>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>Methane, nitrogen, oxygen, and carbon dioxide concentrations were collected at two offshore submarine pockmarks, Miami Pockmark and Key Biscayne Pockmark. A series of dives were performed to gather the data using an autonomous underwater vehicle (AUV) with an Underwater Mass Spectrometer (UMS) instrument. The data were collected May 5-8, 2016 using a Bluefin B12 AUV equipped with a UMS and an onboard calibrated Kearfott T-24 Inertial Navigation System (INS) aided by a GPS Wide Area Augmentation System (WAAS), 600 kHz RDI Doppler Velocity Log (DVL) and a Valeport sound velocity meter.</abstract>
+      <purpose>To conduct a detailed survey and collect methane, nitrogen, oxygen, and carbon dioxide data at the location of two offshore submarine pockmarks, Miami Pockmark and Key Biscayne Pockmark. The data were collected from Dive 326 for the Key Biscayne Pockmark on May 7th, 2016.</purpose>
+      <supplinf>Time Zone Description (ZD) +4 hours.</supplinf>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <sngdate>
+          <caldate>20160507</caldate>
+        </sngdate>
+      </timeinfo>
+      <current>ground condition</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>None planned</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-79.97713535</westbc>
+        <eastbc>-79.97351537</eastbc>
+        <northbc>25.70477097</northbc>
+        <southbc>25.69935032</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>ISO 19115 Topic Category</themekt>
+        <themekey>geoscientificInformation</themekey>
+        <themekey>oceans</themekey>
+      </theme>
+      <theme>
+        <themekt>EPA GIS Keyword Thesaurus</themekt>
+        <themekey>Marine</themekey>
+      </theme>
+      <theme>
+				<themekt>User</themekt>
+				<themekey>Methane</themekey>
+				<themekey>Nitrogen</themekey>
+				<themekey>Oxygen</themekey>
+				<themekey>Carbon dioxide</themekey>
+				<themekey>UMS</themekey>
+        <themekey>Underwater Mass Spectrometer</themekey>
+				<themekey>Ultra-Short Baseline SONAR</themekey>
+				<themekey>USBL Aided</themekey>
+				<themekey>R/V Weatherbird II</themekey>
+				<themekey>Autonomous Underwater Vehicle</themekey>
+				<themekey>AUV</themekey>
+				<themekey>Inertial Navigation System</themekey>
+				<themekey>INS</themekey>
+				<themekey>Subsea Navigation</themekey>
+				<themekey>Key Biscayne Pockmark</themekey>
+				<themekey>Pockmark</themekey>
+			</theme>
+      <place>
+        <placekt>None</placekt>
+        <placekey>Florida</placekey>
+      </place>
+    </keywords>
+    <accconst>none</accconst>
+    <useconst>none</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntperp>
+          <cntper>Kevin J Cunningham</cntper>
+          <cntorg>Southeast Region</cntorg>
+        </cntperp>
+        <cntpos>Hydrologist (RGE)</cntpos>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>3321 College Avenue</address>
+          <city>Davie</city>
+          <state>FL</state>
+          <postal>33314</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>954-377-5913</cntvoice>
+        <cntemail>kcunning@usgs.gov</cntemail>
+      </cntinfo>
+    </ptcontac>
+    <datacred>SRI International and TerraSond Precision Geospatial Solutions for collecting the data.</datacred>
+  </idinfo>
+  <dataqual>
+  	<attracc>
+      <attraccr>No formal attribute accuracy tests were conducted</attraccr>
+    </attracc>
+    <logic>Several tests for permissible values were performed. The test included all samples where the latitude, longitude and depth meet the following requirements: all latitudes within +/- 90 degrees, all longitudes within +/- 180 degrees and all AUV depths within the following range (0 &lt;= depth &lt;= 1000 m). If concentration is &lt;= y intercept then it is set to 0. calibration.</logic>
+    <complete>All data point records (latitude, longitude, depth and mass concentrations) have been verified as complete</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>Data were collected using methods that are accurate to 10 m. AUV used a calibrated T-24 INS aided by a GPS (WAAS),  RDI DVL, SVP and calibrated USBL</horizpar>
+        <qhorizpa>
+          <horizpav>10</horizpav>
+          <horizpae>Tracked using a calibrated USBL</horizpae>
+        </qhorizpa>
+      </horizpa>
+      <vertacc>
+        <vertaccr>Depth from a Keller 33X pressure sensor, 100bar unit. 0.05% of FS (0.5m) accuracy</vertaccr>
+        <qvertpa>
+          <vertaccv>0.5</vertaccv>
+          <vertacce>Depth sensor manufacturer stated full scale accuracy</vertacce>
+        </qvertpa>
+      </vertacc>
+    </posacc>
+    <lineage>
+      <procstep>
+        <procdate>20160507</procdate>
+        <procdesc>Extract concentration data from AUV raw UMS text file</procdesc>
+      </procstep>
+      <procstep>
+        <procdate>20160507</procdate>
+        <procdesc>Process concentration using the associated calibration data.</procdesc>
+      </procstep>
+      <procstep>
+        <procdate>20160507</procdate>
+        <procdesc>Create a new text file in the format of longitude and latitude in decimal degrees, depth in meters, methane in micromole per kilogram, methane_ppmv in parts per million by volume (ppmv), nitrogen in micromole per kilogram, oxygen in in micromole per kilogram and carbon dioxide in micromole per kilogram.</procdesc>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spref>
+		<horizsys>
+			<geograph>
+				<latres>0.00000001</latres>
+				<longres>0.00000001</longres>
+				<geogunit>Decimal degrees</geogunit>
+			</geograph>
+			<geodetic>
+				<horizdn>World Geodetic System 1984</horizdn>
+				<ellips>WGS_1984</ellips>
+				<semiaxis>6378137.000000</semiaxis>
+				<denflat>298.257224</denflat>
+			</geodetic>
+		</horizsys>
+	</spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>D326_UMS_20160507184550.xyz</enttypl>
+        <enttypd>Methane, nitrogen, oxygen, and carbon dioxide data at given depths</enttypd>
+        <enttypds>Producer defined</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>LONG</attrlabl>
+        <attrdef>Longitude, decimal degrees, North American Datum of 1983</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-79.97713535</rdommin>
+            <rdommax>-79.97351537</rdommax>
+            <attrunit>decimal degrees</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>LAT</attrlabl>
+        <attrdef>Latitude, decimal degrees, North American Datum of 1983</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>25.69935032</rdommin>
+            <rdommax>25.70477097</rdommax>
+            <attrunit>decimal degrees</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>DEPTHM</attrlabl>
+        <attrdef>Depth in meters</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-305.32</rdommin>
+            <rdommax>-294.51</rdommax>
+            <attrunit>meters</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>DATETIME</attrlabl>
+        <attrdef>Date and time Local mean time date-time string yyyy/mm/dd hh:mm:ss.000</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <udom>Unknown</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>UNIXNS</attrlabl>
+        <attrdef>Unix Epoch Timestamp nanoseconds</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <udom>Unknown</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>METHANE</attrlabl>
+        <attrdef>Methane in micromole per kilogram</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0.3322239226193</rdommin>
+            <rdommax>0.400487742227641</rdommax>
+            <attrunit>Micromole per kilogram [µmol/kg]</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>METHANE_PP</attrlabl>
+        <attrdef>Methane in parts per million by volume (ppmv)</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>252.686684694927</rdommin>
+            <rdommax>305.156491342215</rdommax>
+            <attrunit>Parts per million by volume (ppmv)</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>NITROGEN</attrlabl>
+        <attrdef>Nitrogen in Micromole per kilogram</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>464.443143780724</rdommin>
+            <rdommax>479.310942893669</rdommax>
+            <attrunit>Micromole per kilogram [µmol/kg]</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>OXYGEN</attrlabl>
+        <attrdef>Oxygen in Micromole per kilogram</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>194.71734695711</rdommin>
+            <rdommax>199.418158533939</rdommax>
+            <attrunit>Micromole per kilogram [µmol/kg]</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>CARBON_DIO</attrlabl>
+        <attrdef>Carbon dioxide in Micromole per kilogram</attrdef>
+        <attrdefs>Producer defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>24.9764112169318</rdommin>
+            <rdommax>25.81059965284</rdommax>
+            <attrunit>Micromole per kilogram [µmol/kg]</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntperp>
+          <cntper>U.S. Geological Survey - Science Base</cntper>
+          <cntorg>U.S. Geological Survey - Science Base</cntorg>
+        </cntperp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>Denver Federal Center, Building 810, Mail Stop 302</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80225</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>sciencebase@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>Any use of trade, firm, or product names is for descriptive purposes only and does not imply endorsement by the U.S. Government. Although this information product, for the most part, is in the public domain, it also contains copyrighted materials as noted in the text. Permission to reproduce copyrighted items must be secured from the copyright owner whenever applicable. The data have been approved for release and publication by the USGS. Although the data have been subjected to rigorous review and are substantially complete, the USGS reserves the right to revise the data pursuant to further analysis and review. Furthermore, the data are released on the condition that neither the USGS nor the U.S. Government may be held liable for any damages resulting from authorized or unauthorized use. Although the data have been processed successfully on a computer system at the USGS, no warranty expressed or implied is made regarding the display or utility of the data on any other system, or for general or scientific purposes, nor shall the act of distribution constitute any such warranty. The USGS shall not be held liable for improper or incorrect use of the data described and/or contained herein. Users of the data are advised to read all metadata and associated documentation thoroughly to understand appropriate use and data limitations.</distliab>
+  </distinfo>
+  <metainfo>
+    <metd>20180228</metd>
+    <metc>
+      <cntinfo>
+        <cntperp>
+          <cntper>Joann F Dixon</cntper>
+          <cntorg>Southeast Region</cntorg>
+        </cntperp>
+        <cntpos>IT Specialist (GIS)</cntpos>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>12703 Research Parkway</address>
+          <city>Orlando</city>
+          <state>FL</state>
+          <postal>32826</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>407-803-5533</cntvoice>
+        <cntemail>jdixon@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+</metadata>
+
