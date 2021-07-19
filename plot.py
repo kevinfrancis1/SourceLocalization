@@ -44,20 +44,25 @@ class PlotUtil:
         if stop:
             plt.show()
 
-    def render_pollution_grid(self, pollution):
+    def render_pollution_grid(self, pollution, show=False):
         self.pollution.clear()
         self.pollution.set(title="Pollution Grid", xlabel="x", ylabel='y', zlabel="z")
         min_pollution = pollution.min()
         max_pollution = pollution.max()
+        pollution_range = (max_pollution - min_pollution)
+        if pollution_range == 0:
+            pollution_range = 1
 
         normalize = cm.colors.Normalize(vmin=min_pollution, vmax=max_pollution)
         scalar_map = cm.ScalarMappable(norm=normalize, cmap=cm.viridis)
         flat_pollution = pollution.ravel()
 
-        sizes = (pollution - min_pollution) / (max_pollution - min_pollution) * 100
+        sizes = (pollution - min_pollution) / pollution_range * 10
         colors = scalar_map.to_rgba(flat_pollution)
 
         self.pollution.scatter(self.xs, self.ys, self.zs, s=sizes, c=colors)
+        if show:
+            plt.show()
 
         # todo:
         # for an xyz color this point between [0 1] based on the normalzied self.pollution_data
@@ -68,7 +73,7 @@ class PlotUtil:
         color = 'gray' if old else 'red'
 
         # self.ax.clear()
-        self.pollution.scatter(agent.x, agent.y, agent.z, s=size, c=color, marker="d")
+        self.pollution.scatter(agent.location.x, agent.location.y, agent.location.z, s=size, c=color, marker="d")
         if pause > 0:
             plt.pause(pause)
 

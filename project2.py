@@ -3,67 +3,67 @@
 # coordinate grid 10x10
 # cells contain percentage 0-100 pollution
 import random
-import numpy as np
+import math
 import time
 
 from environment import Environment
 from agent import Agent
 from plot import PlotUtil
+from point3d import Point3d
 
 # scoring
 from utils import file_print, create_log
 
 performance_measure = []
 
-
 # utility_measure = []
+
+
+def get_logarithmic_methane_boundary(depth):
+    x = (-depth+12)**7
+    offset = 19
+    return - math.log(x) + offset
+
+
+def get_linear_methane_boundary(depth):
+    return (depth + 1) * 0.75
+
+
+def get_methane_for_depth(depth):
+    return -0.07*depth+1
+
+
+def get_methane(cell, source):
+    cell_in_source_reference_frame = Point3d(cell.x - source.x, cell.y - source.y, cell.z)
+
+    planar_distance_to_source = math.sqrt(cell_in_source_reference_frame.x**2 + cell_in_source_reference_frame.y**2)
+    # methane_boundary_distance = get_linear_methane_boundary(cell_in_source_reference_frame.z)
+    methane_boundary_distance = get_logarithmic_methane_boundary(cell_in_source_reference_frame.z)
+    methane_ratio = planar_distance_to_source / methane_boundary_distance
+    max_methane_at_z = get_methane_for_depth(cell.z)
+    methane = (1 - methane_ratio) * max_methane_at_z
+    # print(max(methane, 0))
+    return max(methane, 0)
+
 
 # Generates "world" setting size in 3D, location of the source and "pollution" in each cell
 # gradient/noise level of pollution smaller gradient -> more diffuse. More noise -> more stochastic
-def generate_environment(width: int, height: int, depth: int, source_x: int, source_y: int, source_z: int, grad=0.1,
-                         noise_amplitude=0.0):
-    environment = Environment(width, height, depth, (source_x, source_y, source_z))
+def generate_environment(width: int, height: int, depth: int, source: Point3d, grad=0.1, noise_amplitude=0.0):
+    environment = Environment(width, height, depth, source)
 
     # Sets the pollution diffusion from source to be no-noise or noisy
+
+    # todo: add methane (pollution), co2, temp, salinity, conductivity
+    # todo: change do2 distribution, and maybe update difference between source and methane
+    # todo: translate temperature to Kelvin
+    # todo: gas constant coefficients
     for x in range(width):
         for y in range(height):
             for z in range(depth):
-                delta_x = source_x - x
-                delta_y = source_y - y
-                delta_z = source_z - z
-                # formula for distance b/w 2 points
-                distance = np.sqrt(delta_x * delta_x + delta_y * delta_y + delta_z * delta_z)
-                # establishes difference in pollution level from cell to cell
-                distance_gradient = distance * grad
-                pollution_level = 1 - distance_gradient
-                # print(pollution_level)
-                do2_level = 0 + .60 * distance_gradient
-
-                if pollution_level < 1:
-                    # min prevents noise level from making pollution > 1. prevents multiple false sources
-                    local_noise = min(noise_amplitude, distance_gradient)
-                    noise_pollution = random.random() * local_noise
-                    final_pollution_level = max(0.0, pollution_level + noise_pollution)
-                    # print(final_pollution_level)
-                    environment.set_pollution(x, y, z, final_pollution_level)
-                    final_do2_level = min(1.0, do2_level)
-                    environment.set_do2(x, y, z, final_do2_level)
-                else:
-                    noise_pollution = 0
-                    # max prevents pollution level from generating negative values
-                    final_pollution_level = max(0.0, pollution_level + noise_pollution)
-                    environment.set_pollution(x, y, z, final_pollution_level)
-                    final_do2_level = min(1.0, do2_level)
-                    environment.set_do2(x, y, z, final_do2_level)
+                cell = Point3d(x, y, z)
+                methane = get_methane(cell, source)
+                environment.set_methane(cell, methane)
     return environment
-
-
-# Makes a decision about the action to do
-# Agent knows its location, perceives its status and can "recall" the status of its previous location and the action
-# it took prior
-# rules apply hill climbing global maximum if previous action < current state continue If previous > current turn around
-# expand memory of agent to include last 1-4 moves add a threshold data to reference2-4 nodes
-# implement sim anneal when threshold is not increased over time then random
 
 
 # computes cost of current location and provides a performance measure as a function of cost. Can be used later for
@@ -75,7 +75,7 @@ def generate_environment(width: int, height: int, depth: int, source_x: int, sou
 
 
 def compute_cost(agent, environment):
-    status = environment.get_pollution(agent.x, agent.y, agent.z)
+    status = environment.get_methane(agent.location)
     return 1 - status
 
 
@@ -96,9 +96,9 @@ def program(environment, agent, plot):
     cost = 0
     i = 0
 
-    # sets "lifetime" of agent in world render environment
-    for i in range(1000):
-        #plot.render_agent(agent, old=True, pause=0)
+    # sets "lifetime" of agent in world, render environment
+    for i in range(10000):
+        #plot.render_agent(agent, old=False, pause=0.01)
 
         # outputs data as a comma separated array
         # file_print([i, agent.last_pollution(), cost])
@@ -116,8 +116,8 @@ def program(environment, agent, plot):
         # print(score)
         # -- End Step
 
-        #plot.render_pollution_grid(environment.pollution_data)
-        #plot.render_agent(agent)
+        # plot.render_pollution_grid(environment.methane_data)
+        # plot.render_agent(agent)
     return compute_performance(cost), i
 
 
@@ -127,14 +127,15 @@ if __name__ == "__main__":
     width = 12
     height = 12
     depth = 12
+    source_location = Point3d(5, 5, 0)
+    agent_starting_location = Point3d(0, 0, 0)
 
     plot = PlotUtil(width, height, depth)
-    water = generate_environment(width, height, depth, 5, 5, 5, 1/21, 0.0)
-    bob = Agent(1, 1, 1, width, height, depth, 0.95, 1)
-
+    water = generate_environment(width, height, depth, source_location, 1/21, 0.0)
+    bob = Agent(agent_starting_location, width, height, depth, 0.95, 1)
 
     # render the pollution grid in 3D
-    #plot.render_pollution_grid(water.pollution_data)
+    # plot.render_pollution_grid(water.methane_data, True)
 
     log_name = time.strftime("%Y%m%d-%H%M%S", time.gmtime()) + '-12x12x12_5x5x5_train_stochastic'
     create_log(log_name)
@@ -143,16 +144,16 @@ if __name__ == "__main__":
     totavg = []
     totavgnorm = []
     k = 1
-    #while k < 11:
-        #print("Starting run " + str(k))
+    # while k < 11:
+    # print("Starting run " + str(k))
 
-    for run_index in range(2500):
+    for run_index in range(100):
         print("Finished run %s" % (run_index, ))
         distance_to_source = bob.distance_to(water.goal)
         epsilon = bob.epsilon
         perf, total_step = program(water, bob, plot)
-        bob.update_utilities()
-        #plot.render_utility(bob.utility_table)
+        bob.update_q_states()
+        plot.render_utility(bob.q_table)
 
         bob.reset()
         # print(run_index, total_step, distance_to_source, total_step / distance_to_source)
@@ -160,29 +161,29 @@ if __name__ == "__main__":
         performance_measure.append(perf)
         # prints to csv size, source location, distance, gradient, noise, steps and performance
         file_print([run_index, epsilon, total_step, distance_to_source, (total_step + 1) / (distance_to_source + 1)])
-        #totst.append(total_step)
-        #totstnorm.append((total_step + 1) / (distance_to_source + 1))
-        #k += 1
-        #totavgnorm.append(sum(totstnorm)/len(totstnorm))
-        #totavg.append(sum(totst)/len(totst))
-    #print("Average of average steps: " + str(sum(totavg)/len(totavg)))
-    #print("Average of averages normalized steps: " + str(sum(totavgnorm)/len(totavgnorm)))
-    #file_print(bob.utility_table)
-        # bob.print_utilities()
+        # totst.append(total_step)
+        # totstnorm.append((total_step + 1) / (distance_to_source + 1))
+        # k += 1
+        # totavgnorm.append(sum(totstnorm)/len(totstnorm))
+        # totavg.append(sum(totst)/len(totst))
+    # print("Average of average steps: " + str(sum(totavg)/len(totavg)))
+    # print("Average of averages normalized steps: " + str(sum(totavgnorm)/len(totavgnorm)))
+    # file_print(bob.utility_table)
+        bob.print_utilities()
 
     log_name = time.strftime("%Y%m%d-%H%M%S", time.gmtime()) + '-12x12x12_5x5x5_test_stochastic'
     create_log(log_name)
-    #water = generate_environment(width, height, depth, 5, 7, 6, 1/21, 0.0)
+    # water = generate_environment(width, height, depth, 5, 7, 6, 1/21, 0.0)
     bob.epsilon = 0.0
-    for run_index in range(2500):
-        #print("Now Testing Agent")
+    for run_index in range(0):
+        # print("Now Testing Agent")
         print("Finished run %s" % (run_index, ))
         distance_to_source = bob.distance_to(water.goal)
         epsilon = bob.epsilon
 
         perf, total_step = program(water, bob, plot)
-        #bob.update_utilities()
-        #plot.render_utility(bob.utility_table)
+        # bob.update_utilities()
+        # plot.render_utility(bob.utility_table)
 
         bob.reset()
         # print(run_index, total_step, distance_to_source, total_step / distance_to_source)
@@ -191,10 +192,10 @@ if __name__ == "__main__":
         # prints to csv size, source location, distance, gradient, noise, steps and performance
         file_print([run_index, epsilon, total_step, distance_to_source, (total_step + 1) / (distance_to_source + 1)])
 
-    #file_print(bob.utility_table)
+    # file_print(bob.utility_table)
         # bob.print_utilities()
 
-    #plot.render_utility(bob.utility_table, stop=True)
+    plot.render_utility(bob.q_table, stop=True)
 
     # performance_measure.append(program(0, generate_environment(10, 7), reflex_agent()));
 

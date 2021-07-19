@@ -1,11 +1,14 @@
 import random
 import sys
 from environment import Environment
+from point3d import Point3d
 from utils import debug_print
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+
 REWARD = 100
+
 
 # Template for the agent containing agents x and y coordinate within the world.
 # Contains fnx initializing the location of the agent within the world
@@ -14,23 +17,20 @@ REWARD = 100
 # fnx move_: e,w,n,s provide changes to the appropriate coordinate to move N, S, E, W.  origin at bottom left
 
 
-
 class Agent:
-
     NONE = 'none'
-    POSX = (1, 0, 0)
-    NEGX = (-1, 0, 0)
-    NEGY = (0, -1, 0)
-    POSY = (0, 1, 0)
-    POSZ = (0, 0, 1)
-    NEGZ = (0, 0, -1)
+    POSX = Point3d(1, 0, 0)
+    NEGX = Point3d(-1, 0, 0)
+    NEGY = Point3d(0, -1, 0)
+    POSY = Point3d(0, 1, 0)
+    POSZ = Point3d(0, 0, 1)
+    NEGZ = Point3d(0, 0, -1)
 
     MOVES = [NEGY, POSY, POSX, NEGX, POSZ, NEGZ]
 
-    def __init__(self, x, y, z, space_width, space_height, space_depth, epsilon_decay=0.95, epsilon=1):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, location: Point3d, space_width, space_height, space_depth, epsilon_decay=0.95, epsilon=1):
+        self.location = location
+
         self.width = space_width
         self.height = space_height
         self.depth = space_depth
@@ -56,17 +56,19 @@ class Agent:
         # Make Dict
         self.experiences = []
         # Make 3D numpy array
-
-        self.utility_table = np.zeros((self.width, self.height, self.depth))
+        # utility table array of arrays methane value of d10 and methane gradient (x,y,z) of d12 and moves of d6
+        # todo add O2, O2gradient and salinity once they have been added to environment.
+        self.q_table = np.zeros((10, 12, 12, 12, 6))
 
     def distance_to(self, point):
-        manhattan_distance = abs(self.x - point[0]) + abs(self.y - point[1]) + abs(self.z - point[2])
-        return manhattan_distance
-
-    def location_string(self):
-        return '(%s, %s, %s)' % (self.x, self.y, self.z)
+        return self.location.manhattan_distance(point)
 
     def last_pollution(self):
+        if len(self.experiences) == 0:
+            return 0
+        return self.experiences[len(self.experiences) - 1][0]
+
+    def last_gradient(self):
         if len(self.experiences) == 0:
             return 0
         return self.experiences[len(self.experiences) - 1][1]
@@ -78,22 +80,22 @@ class Agent:
 
     def potential_moves(self):
         moves = []
-        if self.x > 0:
+        if self.location.x > 0:
             moves.append(Agent.NEGX)
 
-        if self.x < self.width - 1:
+        if self.location.x < self.width - 1:
             moves.append(Agent.POSX)
 
-        if self.y > 0:
+        if self.location.y > 0:
             moves.append(Agent.NEGY)
 
-        if self.y < self.height - 1:
+        if self.location.y < self.height - 1:
             moves.append(Agent.POSY)
 
-        if self.z > 0:
+        if self.location.z > 0:
             moves.append(Agent.NEGZ)
 
-        if self.z < self.depth - 1:
+        if self.location.z < self.depth - 1:
             moves.append(Agent.POSZ)
 
         return moves
@@ -101,17 +103,17 @@ class Agent:
     def choose_action(self, environment: Environment):
 
         # perceive environment status based on location
-        pollution = environment.get_pollution(self.x, self.y, self.z)
-        do2 = environment.get_do2(self.x, self.y, self.z)
+        pollution = environment.get_methane(self.location)
+        do2 = environment.get_do2(self.location)
 
         # if agent is at source it will do nothing
         if pollution == Environment.SOURCE:
-            debug_print('source found at, %s. Pollution: %s do2: %s' % (self.location_string(), pollution, do2))
+            debug_print('source found at, %s. Pollution: %s do2: %s' % (self.location.to_string(), pollution, do2))
             print('Found Source')
             return Agent.NONE
 
         # Error checking
-        if self.x < 0 or self.y < 0 or self.z < 0:
+        if self.location.x < 0 or self.location.y < 0 or self.location.z < 0:
             print('ERROR: Agent is outside of bounds, exiting')
             sys.exit()
 
@@ -127,18 +129,21 @@ class Agent:
         if random.random() < self.epsilon:
             action = random.choice(moves)
             debug_print('Moving %s from %s. Pollution: %s do2: %s'
-                        % (action, self.location_string(), pollution, do2))
+                        % (action, self.location.to_string(), pollution, do2))
             return action
-
 
         # Exploitation of Action Policy
         # exploit
         best_utility = None
         best_move = None
+        # updates action in q table
+        # todo check to make sure this is updating the action in the q-table idx(4)
         for move in moves:
-            debug_print('Checking move %s.' % (move, ))
-            x, y, z = self.next_local(move)
-            utility = self.utility_table[x, y, z]
+            debug_print('Checking move %s.' % (move.to_string()))
+            next_local = self.location.clone()
+            next_local.add(move)
+            # todo this doesn't work because it only points to the action slice, not the action paired with states
+            utility = self.q_table[4]
             if best_utility is None or utility > best_utility:
                 best_utility = utility
                 best_move = move
@@ -146,66 +151,46 @@ class Agent:
         debug_print('choose based on utility')
         return best_move
 
-        # if pollution is increasing and DO2 is decreasing the agent will return the previous action otherwise random.
-        # if do2 < self.last_do2():
-        #     debug_print('Moving %s, from %s pollution: %s do2: %s.'
-        #                 % (self.previous_action, self.location_string(), pollution, do2))
-        #     return self.previous_action
-        #
-        # if do2 == self.last_do2():
-        #     if pollution >= self.last_pollution():
-        #         debug_print('Moving %s, from %s pollution: %s do2: %s.'
-        #                     % (self.previous_action, self.location_string(), pollution, do2))
-        #         return self.previous_action
-        #     else:
-        #         action = random.choice((Agent.NEGX, Agent.POSX, Agent.NEGY, Agent.POSY, Agent.POSZ, Agent.NEGZ))
-        #         debug_print('Moving %s from %s pollution: %s , DO2: %s'
-        #                     % (action, self.location_string(), pollution, do2))
-        #         return action
-        #
-        # if do2 > self.last_do2():
-        #     action = random.choice((Agent.NEGX, Agent.POSX, Agent.NEGY, Agent.POSY, Agent.POSZ, Agent.NEGZ))
-        #     # debug_print('DO2 increasing. Moving %s' % action)
-        #     return action
-        #
-        # print("unknown status:", pollution)
+    # todo bucketize each parameter. Bucketize function added to utils file, needs to be implemented in the utility update.
+    # todo how to find the expected future reward.
 
-    def is_at(self, x, y, z):
-        # print(x, y, z)
-        return self.x == x and self.y == y and self.z == z
-
-    def update_utilities(self):
+    def update_q_states(self):
+        # todo re-write function based on bellman eq.
+    def update_q_states(self):
         exp_count = len(self.experiences)
         trial_u = [0] * exp_count
         for exp_idx in range(exp_count, 0, -1):
-            experience = self.experiences[exp_idx-1]
+            experience = self.experiences[exp_idx - 1]
             exp_reward = experience[3]
             for r_idx in range(exp_idx, 0, -1):
-                trial_u[r_idx-1] += exp_reward
+                trial_u[r_idx - 1] += exp_reward
                 exp_reward *= self.gamma
 
         # alpha is 0.5 (utility+trialu/2). adjust alpha by changing denominator
         for exp_idx in range(exp_count):
             experience = self.experiences[exp_idx]
-            x, y, z = experience[0]
-            current_utility = self.utility_table[x, y, z]
-            self.utility_table[x, y, z] = (current_utility + trial_u[exp_idx]) / 2
+            pollution = experience[0]
+            methane_gradient = experience[1]
+            current_utility = self.q_table[0, 1, 2, 3, 4]
+            self.q_table[0, 1, 2, 3, 4] = (current_utility + trial_u[exp_idx]) / 2
 
     def print_utilities(self):
         for x in range(self.width):
             for y in range(self.height):
                 for z in range(self.depth):
-                    print('{:.2f} '.format(self.utility_table[x, y, z]), end='')
+                    print('{:.2f} '.format(self.q_table[x, y, z]), end='')
             print()
 
     def reset(self):
-        # todo once total steps are normalized in the project.py reset to random positions
+        # todo once total steps are normalized in the project.py reset to random positions (this is old... maybe
+        #  don't do this)
         self.epsilon *= self.epsilon_decay
-        self.x = random.randint(0, self.width-1)
-        self.y = random.randint(0, self.height-1)
-        self.z = random.randint(0, self.depth-1)
+        self.location.x = random.randint(0, self.width - 1)
+        self.location.y = random.randint(0, self.height - 1)
+        self.location.z = random.randint(0, self.depth - 1)
         self.experiences.clear()
 
+    # todo update reward based on underlying phenomena
     # def reward(self, environment):
     #     reward = 0
     #     if environment.is_goal(self.x, self.y):
@@ -214,14 +199,15 @@ class Agent:
 
     # Pollution reward
     def reward(self, environment):
-        if environment.get_pollution(self.x, self.y, self.z) == Environment.SOURCE:
+        if environment.get_methane(self.location) == Environment.SOURCE:
             return 100
         return 0
 
     def act(self, action, environment: Environment):
         # allows agent to know action and status of prior environment
-        pollution = environment.get_pollution(self.x, self.y, self.z)
-        do2 = environment.get_do2(self.x, self.y, self.z)
+        pollution = environment.get_methane(self.location)
+
+        do2 = environment.get_do2(self.location)
 
         self.previous_action = action
 
@@ -229,69 +215,22 @@ class Agent:
         if action == Agent.NONE:
             return
 
-        # in case the action is left location equals location - 1
-        if action == Agent.NEGX:
-            self.move_NEGX()
-
-        #   in case the action is right location equals location + 1
-        if action == Agent.POSX:
-            self.move_POSX()
-
-        #   in case the action is right location equals location + 1
-        if action == Agent.POSY:
-            self.move_POSY()
-
-        #   in case the action is right location equals location + 1
-        if action == Agent.NEGY:
-            self.move_NEGY()
-
-        #   in case the action is right location equals location + 1
-        if action == Agent.POSZ:
-            self.move_POSZ()
-
-        #   in case the action is left location equals location - 1
-        if action == Agent.NEGZ:
-            self.move_NEGZ()
+        self.move(action)
 
         reward = self.reward(environment)
-        # Make experiences a dict with key being x, y, z
+        # Experiences hold methane gradient, do2 and reward
         self.experiences.append(
             (
-                (self.x, self.y, self.z),
                 pollution,
+                environment.methane_gradient(),
                 do2,
                 reward
+
             )
         )
 
-    def move(self, delta_x, delta_y, delta_z):
-        self.x += delta_x
-        self.y += delta_y
-        self.z += delta_z
-
-    def move_POSX(self):
-        self.move(1, 0, 0)
-
-    def move_NEGX(self):
-        self.move(-1, 0, 0)
-
-    def move_NEGY(self):
-        self.move(0, -1, 0)
-
-    def move_POSY(self):
-        self.move(0, 1, 0)
-
-    def move_POSZ(self):
-        self.move(0, 0, 1)
-
-    def move_NEGZ(self):
-        self.move(0, 0, -1)
-
-    def location(self):
-        return self.x, self.y, self.z
+    def move(self, delta: Point3d):
+        self.location.add(delta)
 
     def set_utility(self, location, utility):
-        self.utility_table[location] = utility
-
-    def next_local(self, move):
-        return self.x + move[0], self.y + move[1], self.z + move[2]
+        self.q_table[location] = utility
