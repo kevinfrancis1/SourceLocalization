@@ -1,12 +1,16 @@
+import numpy as np
 
 DEBUG = False
 
 file = None
 
 
-def bucketize(value, min_range, max_range, bucket):
-    bucket_idx = ((value - min_range)/(max_range - min_range)) * bucket
-    return bucket_idx
+def euclidean_distance(a1: np.ndarray, a2: np.ndarray):
+    return np.sqrt(np.sum((a1 - a2) ** 2))
+
+
+def manhattan_distance(a1: np.ndarray, a2: np.ndarray):
+    return np.sum(abs(a1 - a2))
 
 
 def create_log(name):
