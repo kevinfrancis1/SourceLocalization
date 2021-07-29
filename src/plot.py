@@ -3,6 +3,7 @@ import numpy as np
 
 from agent import Agent
 from environment import Environment
+from src import utils
 
 
 class PlotUtil:
@@ -92,7 +93,8 @@ class PlotUtil:
 
         PlotUtil._rewards.clear()
         trials = np.arange(0, len(rewards))
-        PlotUtil._rewards.plot(trials, rewards)
+        rewards_running_mean = utils.running_mean(rewards, 100)
+        PlotUtil._rewards.plot(trials, rewards_running_mean)
         PlotUtil._epsilons.plot(trials, epsilons)
 
     @staticmethod
